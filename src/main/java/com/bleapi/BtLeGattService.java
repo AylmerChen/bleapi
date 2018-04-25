@@ -39,7 +39,7 @@ import java.util.UUID;
 
 /**
  * GATT 服务类，负责低功耗蓝牙的通信
- * @author Lasern
+ * @author AylmerChen
  */
 public class BtLeGattService extends Service {
 
@@ -299,7 +299,6 @@ public class BtLeGattService extends Service {
     /**
      * 开启 GATT 连接
      * @param address mac 地址
-     * @return 是否开启成功
      */
     public void openGATT(@NonNull final String address) {
         if ( mBluetoothAdapter != null ) {
