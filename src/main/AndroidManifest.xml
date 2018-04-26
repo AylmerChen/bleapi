@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.bleapi">
+          package="com.aylmerchen.lib">
 
     <!--蓝牙所需权限-->
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>

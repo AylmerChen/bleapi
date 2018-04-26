@@ -1,4 +1,4 @@
-package com.bleapi;
+package com.aylmerchen.lib;
 
 import android.annotation.TargetApi;
 import android.app.Service;
@@ -16,7 +16,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArraySet;
-import android.util.Log;
 
 import java.util.Set;
 import java.util.concurrent.Executors;

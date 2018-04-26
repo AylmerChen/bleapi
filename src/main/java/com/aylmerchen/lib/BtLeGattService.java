@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.bleapi;
+package com.aylmerchen.lib;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
