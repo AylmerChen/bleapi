@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'  // 用于发布该 module
+
 
 android {
     compileSdkVersion 27
@@ -9,7 +11,8 @@ android {
         versionCode 1
         versionName "1.0"
 
-        resourcePrefix "com.bleapi."
+        // 防止和其他 module 中的资源命名发生冲突
+        resourcePrefix "com.aylmerchen.ble"
 
     testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -22,14 +25,15 @@ android {
 
     buildTypes {
         release {
+            buildConfigField "boolean", "debug", "false"    // 不显示 log
+
             minifyEnabled true
             zipAlignEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
         debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "debug", "true"
         }
     }
 
@@ -42,6 +46,55 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+}
 
 
+////生成源文件
+//task sourcesJar(type: Jar) {
+//    from android.sourceSets.main.java.srcDirs
+//    classifier = 'sources'
+//}
+
+//生成Javadoc文档
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+//文档打包成jar
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+//拷贝javadoc文件
+task copyDoc(type: Copy) {
+    from "${buildDir}/docs/"
+    into "docs"
+}
+
+//上传到JCenter所需要的源码文件
+artifacts {
+    archives javadocJar
+    //不上传源码
+//    archives sourcesJar
+}
+
+//解决 JavaDoc 中文注释生成失败的问题
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+
+//发布到 Bintray
+publish {
+
+    userOrg = 'aylmerchen'
+    groupId = 'com.aylmerchen.ble'
+    artifactId = 'BleApi'
+    publishVersion = '0.1.6-beta'
+    desc = ''
+    website = 'https://github.com/AylmerChen/bleapi'
 }

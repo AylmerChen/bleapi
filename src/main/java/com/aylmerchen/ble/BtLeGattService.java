@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.aylmerchen.lib;
+package com.aylmerchen.ble;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -40,6 +40,7 @@ import java.util.UUID;
 /**
  * GATT 服务类，负责低功耗蓝牙的通信
  * @author AylmerChen
+ * @date 2018/4/17
  */
 public class BtLeGattService extends Service {
 

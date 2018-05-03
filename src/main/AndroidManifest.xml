@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.aylmerchen.lib">
+          package="com.aylmerchen.ble">
 
     <!--蓝牙所需权限-->
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
@@ -10,9 +10,9 @@
 
 
     <application>
-        <service android:name=".BtLeScanService"/>
+        <service android:name="com.aylmerchen.ble.BtLeScanService"/>
 
-        <service android:name=".BtLeGattService" />
+        <service android:name="com.aylmerchen.ble.BtLeGattService" />
 
     </application>
 </manifest>

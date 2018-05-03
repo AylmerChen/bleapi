@@ -1,4 +1,4 @@
-package com.aylmerchen.lib;
+package com.aylmerchen.ble;
 
 import android.annotation.TargetApi;
 import android.app.Service;
@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArraySet;
+import android.util.Log;
 
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -23,9 +24,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.aylmerchen.ble.BuildConfig.debug;
+
 /**
  * 低功耗蓝牙扫描服务，负责低功耗蓝牙的连接
  * @author AylmerChen
+ * @date 2018/4/17
  */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class BtLeScanService extends Service {
@@ -129,6 +133,37 @@ public class BtLeScanService extends Service {
                     @Override
                     public void onScanFailed(int errorCode) {
                         super.onScanFailed(errorCode);
+                        switch (errorCode){
+                            case SCAN_FAILED_ALREADY_STARTED:
+                                if (debug) {
+                                    Log.e(TAG, "Fails to start scan as BLE scan with the same settings is already started by the app.");
+                                }
+                                break;
+
+                            case SCAN_FAILED_APPLICATION_REGISTRATION_FAILED:
+                                if (debug) {
+                                    Log.e(TAG, "Fails to start scan as app cannot be registered.");
+                                }
+                                break;
+
+                            case SCAN_FAILED_INTERNAL_ERROR:
+                                if (debug) {
+                                    Log.e(TAG, "Fails to start scan due an internal error.");
+                                }
+                                break;
+
+                            case SCAN_FAILED_FEATURE_UNSUPPORTED:
+                                if (debug) {
+                                    Log.e(TAG, "Fails to start power optimized scan as this feature is not supported.");
+                                }
+                                break;
+
+                            default:
+                                if (debug) {
+                                    Log.e(TAG, "Unknown scan error.");
+                                }
+                                break;
+                        }
                         scanHandler.obtainMessage(MSG_SCAN_ERROR).sendToTarget();
                     }
                 };
@@ -185,18 +220,29 @@ public class BtLeScanService extends Service {
 
         BluetoothManager mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (mBluetoothManager == null) {
+            if(debug){
+                Log.e(TAG, "Unable to initialize BluetoothManager.");
+            }
             return false;
         }
 
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         if (mBluetoothAdapter == null) {
+            if(debug){
+                Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
+            }
             return false;
         }
 
         // 版本高于 21 ，采用新的 api
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
-            return mBluetoothLeScanner != null;
+            if(mBluetoothLeScanner == null){
+                if(debug){
+                    Log.e(TAG, "Unable to obtain a BluetoothLeScanner.");
+                }
+                return false;
+            }
         }
         return true;
     }
@@ -225,6 +271,7 @@ public class BtLeScanService extends Service {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if ( mBluetoothLeScanner != null) {
+
                 // 定时时间到则停止扫描
                 pool.schedule(new Runnable() {
                     @Override
@@ -235,6 +282,9 @@ public class BtLeScanService extends Service {
 
                 mBluetoothLeScanner.startScan(newScanCallback);
                 isScanning.set(true);
+
+            } else if(debug) {
+                Log.e(TAG, "未获取到 LeScanner, 无法开始扫描");
             }
         } else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
 
@@ -265,6 +315,8 @@ public class BtLeScanService extends Service {
                     mBluetoothLeScanner.stopScan(newScanCallback);
                     isScanning.set(false);
                     scanHandler.obtainMessage(MSG_SCAN_STOP).sendToTarget();
+                } else if(debug) {
+                    Log.e(TAG, "未获取到 LeScanner, 无法停止扫描");
                 }
             } else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2){
                 if ( mBluetoothAdapter != null) {
